@@ -1,7 +1,8 @@
-const socket = io('/')
+const socket = io('/');
 
 const videoGrid = document.getElementById('video-grid')
-
+const myVideo = document.createElement('video')
+myVideo.muted = true;
 const myPeer = new Peer(undefined, {
     path: '/peerjs',
     host: '/',
@@ -9,9 +10,8 @@ const myPeer = new Peer(undefined, {
 })
 
 let myVideoStream;
-const myVideo = document.createElement('video')
-myVideo.muted = true;
-const peers = {}
+
+const peers = {};
 
 navigator.mediaDevices.getUserMedia({
     video: true,
@@ -24,57 +24,54 @@ navigator.mediaDevices.getUserMedia({
         const video = document.createElement('video')
         call.on('stream', userVideoStream => {
             addVideoStream(video, userVideoStream)
-        })
-    })
+        });
+    });
     socket.on('user-connected', userId => {
         connectToNewUser(userId, stream)
     })
-
-
-    let text = $("input");
-
-    $('html').keydown(function(e) {
-        if(e.which == 13 && text.val().length !== 0) {
-            socket.emit('message', text.val());
-            text.val('')
-        }
-    });
-
-    socket.on("createMessage", messages => {
-        $("ul").append(`<li class="message"><b>user</b><br/>${messages}</li>`);
-        scrollToBottom()
-    })
-})
-
-socket.on('user-disconnected', userId => {
-    if(peers[userId]) peers[userId].close()
-})
-
+});
 myPeer.on('open', id => {
     socket.emit('join-room', ROOM_ID, id);
-})
-
-
-function connectToNewUser(userId, stream){
+});
+function connectToNewUser(userId, stream) {
     const call = myPeer.call(userId, stream)
     const video = document.createElement('video')
     call.on('stream', userVideoStream => {
         addVideoStream(video, userVideoStream)
-    })
-    call.on('close', () => {
-        video.remove()
-    })
-    peers[userId] = call
-}
+    });
+};
 
 
-function addVideoStream (video, stream){
+function addVideoStream(video, stream) {
     video.srcObject = stream
     video.addEventListener('loadedmetadata', () => {
         video.play()
-    })
+    });
     videoGrid.append(video)
-} 
+};
+
+let text = $("input");
+
+$('html').keydown(function (e) {
+    if (e.which == 13 && text.val().length !== 0) {
+        socket.emit('message', text.val());
+        text.val('')
+    }
+});
+
+socket.on("createMessage", messages => {
+    $("ul").append(`<li class="message"><b>user</b><br/>${messages}</li>`);
+    scrollToBottom()
+})
+
+/*socket.on('user-disconnected', userId => {
+    if (peers[userId]) peers[userId].close()
+})*/
+
+
+
+
+
 
 const scrollToBottom = () => {
     var d = $('.main__chat_window');
@@ -86,11 +83,11 @@ const muteUnmute = () => {
     if (enabled) {
         myVideoStream.getAudioTracks()[0].enabled = false;
         setUnmuteButton();
-    }else {
+    } else {
         setMuteButton();
         myVideoStream.getAudioTracks()[0].enabled = true;
     }
-    
+
 }
 
 const setMuteButton = () => {
@@ -123,7 +120,7 @@ const playStop = () => {
 }
 
 const setStopVideo = () => {
-    const html =`
+    const html = `
      <i class=" fas fa-video"> </i>
      <span>Stop Video</span>
      `
@@ -131,7 +128,7 @@ const setStopVideo = () => {
 }
 
 const setPlayVideo = () => {
-    const html =`
+    const html = `
      <i class="stop fas fa-video-slash"> </i>
      <span>Play Video</span>
      `

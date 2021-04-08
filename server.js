@@ -13,7 +13,7 @@ app.use('/peerjs', peerServer);
 
 
 app.set('view engine', 'ejs')
-app.use(express.static('public'))
+app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.redirect(`/${uuidv4()}`)
  
@@ -21,14 +21,14 @@ app.get('/', (req, res) => {
 
 app.get('/:room', (req, res) => {
     res.render('room', { roomId: req.params.room })
-})
+});
 
 io.on('connection', socket => {
     socket.on('join-room', (roomId, userId) => {
         socket.join(roomId)
-        socket.to(roomId).emit('user-connected', userId);
+        socket.to(roomId).broadcast.emit('user-connected', userId);
         socket.on('message', (messages) => {
-            io.to(roomId).emit('createMessage', messages)
+            io.to(roomId).emit('createMessage', messages) 
         });
         socket.on('disconnect', () => {
             socket.to(roomId).broadcast.emit('user-disconnected', userId)
@@ -36,5 +36,4 @@ io.on('connection', socket => {
     })  
 })
 
-const PORT = process.env.PORT || 3030
-server.listen(PORT, () => console.log(`Listening on port ${PORT}`))
+server.listen(process.env.PORT || 3030);
